@@ -19,10 +19,8 @@ import { deleteTask, fetchTasks } from '../../src/redux/Slices/Fields';
 import { useRouter } from 'expo-router';
 import { useToast } from '../../src/components/customtoast';
 
-
 const TaskList = () => {
-  
-  const router = useRouter()
+  const router = useRouter();
   const dispatch = useDispatch();
   const { user } = useContext(AuthContext);
   
@@ -36,7 +34,8 @@ const TaskList = () => {
 
   // Redux state
   const { tasks, loading, error } = useSelector((state) => state.field);
-  const {showToast} = useToast();
+  const { showToast } = useToast();
+
   // Authentication check
   const checkAuthentication = () => {
     if (!user?.id) {
@@ -46,22 +45,29 @@ const TaskList = () => {
     return true;
   };
 
-  // Fetch tasks with error handling
-const handleFetchTasks = async () => {
+ 
+  // Fetch tasks with error handling and filtering
+  const handleFetchTasks = async () => {
     if (!checkAuthentication()) return;
 
     try {
-      setIsLoading(true);
-      setErrorMessage('');
-      const result = await dispatch(fetchTasks(user.id)).unwrap();
-      setLocalTasks(result);
+        setIsLoading(true);
+        setErrorMessage('');
+        const result = await dispatch(fetchTasks(user.id)).unwrap();
+
+        // Filter tasks where user.fullName exists in task.assignees
+        const filteredTasks = result.filter(task =>
+            task.assignees.some(assignee => assignee.name === user.fullName)
+        );
+
+        setLocalTasks(filteredTasks);
     } catch (err) {
-      setErrorMessage('Failed to fetch tasks. Please try again.');
-      console.error('Error fetching tasks:', err);
+        setErrorMessage('Failed to fetch tasks. Please try again.');
+        console.error('Error fetching tasks:', err);
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
 
   // Delete task with error handling
   const handleDeleteTask = async (taskId) => {
@@ -69,11 +75,11 @@ const handleFetchTasks = async () => {
       setIsLoading(true);
       await dispatch(deleteTask(taskId)).unwrap();
       setLocalTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
-      showToast("Task Delete Successfuly", "success");
+      showToast("Task Deleted Successfully", "success");
     } catch (err) {
       setErrorMessage('Failed to delete task. Please try again.');
       console.error('Error deleting task:', err);
-      showToast("Fail to Delete task", "error");
+      showToast("Failed to delete task", "error");
     } finally {
       setIsLoading(false);
     }
@@ -86,9 +92,6 @@ const handleFetchTasks = async () => {
     setRefreshing(false);
   };
 
-
-  
-
   useEffect(() => {
     handleFetchTasks();
   }, [user?.id]);
@@ -96,7 +99,8 @@ const handleFetchTasks = async () => {
   // Update local state when Redux state changes
   useEffect(() => {
     if (tasks) {
-      setLocalTasks(tasks);
+      const filteredTasks = tasks.filter(task => task.userId === user.id);
+      setLocalTasks(filteredTasks);
     }
   }, [tasks]);
 
@@ -174,7 +178,7 @@ const handleFetchTasks = async () => {
           resizeMode="contain"
         />
         <Text className="mt-4 text-gray-800 text-lg font-medium text-center">
-          No tasks available
+          No assigned tasks available
         </Text>
         <TouchableOpacity 
           onPress={onRefresh}
@@ -194,19 +198,23 @@ const handleFetchTasks = async () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Header Section */}
-        <View className="bg-white px-4 py-6 border-b border-gray-200">
-          <Text className="text-2xl font-bold text-gray-800">Field Notes</Text>
-          <View className="flex-row mt-4 justify-between">
-            <View className="flex-row items-center">
-              <FontAwesome5 name="tasks" size={16} color="#0891b2" />
-              <Text className="ml-2 text-gray-600 font-medium">
-                {localTasks.length} Active Fields
-              </Text>
+        {/* Updated Header Section */}
+        <View className="bg-white px-4 py-6 shadow-sm">
+          <View className="flex-row items-center justify-between">
+            <View>
+              <Text className="text-2xl font-bold text-gray-800">My Tasks</Text>
+              <View className="flex-row items-center mt-2">
+                <FontAwesome5 name="clipboard-check" size={16} color="#0891b2" />
+                <Text className="ml-2 text-gray-600">
+                  {localTasks.length} Assigned {localTasks.length === 1 ? 'Task' : 'Tasks'}
+                </Text>
+              </View>
             </View>
-            <TouchableOpacity className="bg-blue-600 px-2 py-2 rounded-lg flex-row items-center">
-              <FontAwesome5 name="plus" size={12} color="white" />
-              <Text onPress={() => router.push('/screens/createtask')} className="text-white text-sm font-medium ml-2">New Inspection</Text>
+            <TouchableOpacity 
+              onPress={onRefresh}
+              className="w-10 h-10 bg-gray-50 rounded-full items-center justify-center"
+            >
+              <FontAwesome5 name="sync-alt" size={16} color="#0891b2" />
             </TouchableOpacity>
           </View>
         </View>
@@ -234,7 +242,6 @@ const handleFetchTasks = async () => {
                     <Text className="font-medium">{task.status}</Text>
                   </View>
                   <View className="flex-row">
-                    
                     <TouchableOpacity 
                       onPress={(e) => {
                         e.stopPropagation();
@@ -348,8 +355,6 @@ const handleFetchTasks = async () => {
         </View>
       </ScrollView>
 
-     
-
       <TaskDialog
         visible={dialogVisible}
         task={selectedTask}
@@ -357,6 +362,7 @@ const handleFetchTasks = async () => {
           setDialogVisible(false);
           setSelectedTask(null);
         }}
+        showEditButton={false}
       />
     </>
   );

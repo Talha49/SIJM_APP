@@ -199,9 +199,10 @@ const Home = () => {
       <View className="mx-4 mt-6">
         <View className="flex-row justify-between items-center mb-4">
           <Text className="text-lg font-bold">Priority Tasks</Text>
-          <TouchableOpacity>
-            <Text className="text-blue-500">View All</Text>
-          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/Fields')}>
+  <Text className="text-blue-500">View All</Text>
+</TouchableOpacity>
+
         </View>
 
         {user ? (
@@ -229,31 +230,23 @@ const Home = () => {
       </View>
 
       <View className="mx-4 mt-6 mb-4">
-        <Text className="text-lg font-bold mb-4">Quick Actions</Text>
-        <View className="flex-row">
-          <QuickActionButton 
-            icon="plus" 
-            label="New Inspection" 
-            onPress={() => router.push('/screens/createtask')}
-          />
-          <QuickActionButton icon="cog" label="Settings" />
-        </View>
-      </View>
+  <Text className="text-lg font-bold mb-4">Quick Actions</Text>
+  <View className="flex-row">
+    <QuickActionButton 
+      icon="plus" 
+      label="New Inspection" 
+      onPress={() => router.push('/screens/createtask')}
+    />
+    <QuickActionButton 
+      icon="briefcase"  // Changed icon
+      label="Assigned Tasks" 
+      onPress={() => router.push('/screens/assigned')}
+    />
+  </View>
+</View>
 
-      <View className="bg-gray-100 p-6 mt-6">
-        <View className="flex-row justify-around">
-          <TouchableOpacity>
-            <Text className="text-gray-600">About</Text>
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Text className="text-gray-600">Contact</Text>
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Text className="text-gray-600">Privacy</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
 
+      
       <TaskDialog
         visible={dialogVisible}
         task={selectedTask}

@@ -4,11 +4,13 @@ import Header from '../src/components/Header'; // Adjust the path as needed
 import { AuthProvider } from '../src/contexts/AuthContext';
 import { Provider } from 'react-redux';
 import store from '../src/redux/Store/store';
+import { ToastProvider } from '../src/components/customtoast';
 export default function RootLayout() {
   return (
     <>
 
     <Provider store={store}>
+    <ToastProvider> 
     <AuthProvider>
       {/* Global Header */}
      <Header />
@@ -23,6 +25,7 @@ export default function RootLayout() {
       </Stack>
 
       </AuthProvider>
+      </ToastProvider>
       </Provider>
     </>
   );
