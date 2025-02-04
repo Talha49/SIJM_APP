@@ -29,9 +29,9 @@ export default function TabLayout() {
 
       {/* Task Tab */}
       <Tabs.Screen
-        name="Task"
+        name="Fields"
         options={{
-          title: 'Task',
+          title: 'Fields',
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="tasks" size={size} color={color} />
           ),

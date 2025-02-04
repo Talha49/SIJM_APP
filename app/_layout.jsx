@@ -2,10 +2,13 @@ import { Stack } from 'expo-router';
 import '../global.css';
 import Header from '../src/components/Header'; // Adjust the path as needed
 import { AuthProvider } from '../src/contexts/AuthContext';
-
+import { Provider } from 'react-redux';
+import store from '../src/redux/Store/store';
 export default function RootLayout() {
   return (
     <>
+
+    <Provider store={store}>
     <AuthProvider>
       {/* Global Header */}
      <Header />
@@ -20,6 +23,7 @@ export default function RootLayout() {
       </Stack>
 
       </AuthProvider>
+      </Provider>
     </>
   );
 }

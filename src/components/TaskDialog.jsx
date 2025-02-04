@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { 
-  View, 
-  Text, 
-  Modal, 
-  TouchableOpacity, 
-  ScrollView, 
-  Image,
-  Dimensions,
-  Pressable
+    View, 
+    Text, 
+    Modal, 
+    TouchableOpacity, 
+    ScrollView, 
+    Image,
+    Dimensions,
+    Pressable,
+    Linking
 } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 
@@ -28,6 +29,15 @@ const TaskDialog = ({ visible, task, onClose }) => {
 
   const prevImage = () => {
     setActiveImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  };
+
+  const handleDownload = async (url) => {
+    try {
+      await Linking.openURL(url);
+    } catch (error) {
+      console.error('Error opening attachment:', error);
+      // You might want to show an error toast/alert here
+    }
   };
 
   if (!task) return null;
@@ -203,6 +213,51 @@ const TaskDialog = ({ visible, task, onClose }) => {
                 </View>
               </View>
             </View>
+            {task.attachments && task.attachments.length > 0 && (
+              <View className="p-4 mt-4">
+                <Text className="text-lg font-bold text-gray-800 mb-3">Attachments</Text>
+                <View className="space-y-2">
+                  {task.attachments.map((attachment, index) => {
+                    const fileName = attachment.url.split('/').pop().split('?')[0];
+                    const fileExt = fileName.split('.').pop().toUpperCase();
+                    
+                    return (
+                      <TouchableOpacity
+                        key={attachment._id}
+                        onPress={() => handleDownload(attachment.url)}
+                        className="flex-row items-center bg-gray-50 p-4 rounded-xl"
+                      >
+                        <View className="w-10 h-10 bg-blue-100 rounded-lg justify-center items-center">
+                          <FontAwesome5 
+                            name={fileExt === 'PDF' ? 'file-pdf' : 'file'}
+                            size={20}
+                            color="#2563eb"
+                          />
+                        </View>
+                        <View className="flex-1 ml-3">
+                          <Text className="font-medium text-gray-800" numberOfLines={1}>
+                            {decodeURIComponent(fileName)}
+                          </Text>
+                          <Text className="text-gray-500 text-sm">
+                            {fileExt} Document
+                          </Text>
+                        </View>
+                        <TouchableOpacity 
+                          onPress={() => handleDownload(attachment.url)}
+                          className="ml-2 p-2"
+                        >
+                          <FontAwesome5 
+                            name="download" 
+                            size={16} 
+                            color="#2563eb"
+                          />
+                        </TouchableOpacity>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+            )}
           </ScrollView>
         </View>
       </View>

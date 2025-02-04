@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { View, Text, TouchableOpacity, Image, Button } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRouter } from "expo-router";
+import { AuthContext } from "../contexts/AuthContext";
 
 export default function Header() {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
+
+  const { user, logout } = useContext(AuthContext);
+
   const toggleDialog = () => {
     setIsDialogVisible(!isDialogVisible);
   };
@@ -17,7 +21,7 @@ export default function Header() {
       <View className="flex-row items-center">
         <Image
           source={require("../../assets/SIJM.webp")} // Replace with your logo path
-          className="h-12 w-12 mr-2 rounded-full border-black/25   bg-slate-100 border-2"
+          className="h-12 w-12 mr-2 rounded-full border-black/25 bg-slate-100 border-2"
           resizeMode="contain"
         />
         <Text className="text-white text-lg font-bold">SIJM</Text>
@@ -35,16 +39,29 @@ export default function Header() {
           style={{ zIndex: 10 }}
         >
           <Text className="text-lg font-semibold text-center mb-4">
-            Welcome!
+            {user ? `Hello, ${user.fullName}!` : "Welcome!"}
           </Text>
-          {/* Button to navigate to login screen */}
-          <Button
-            title="Login"
-            onPress={() => {
-              router.push("/screens/login");
-              toggleDialog();
-            }}
-          />
+
+          {/* Conditional Rendering: Show Login if not logged in, Logout if logged in */}
+          {user ? (
+            <Button
+              title="Logout"
+              onPress={() => {
+                logout();
+                toggleDialog();
+              }}
+            />
+          ) : (
+            <Button
+              title="Login"
+              onPress={() => {
+                router.push("/screens/login");
+                toggleDialog();
+              }}
+            />
+          )}
+
+          {/* Close Dialog Button */}
           <TouchableOpacity onPress={toggleDialog} className="mt-4">
             <Text className="text-center text-gray-500">Close</Text>
           </TouchableOpacity>

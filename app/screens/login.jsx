@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+// LoginScreen.js
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,31 +7,23 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  Button,
+  Alert,
+  Keyboard,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { Link, useNavigation } from "expo-router";
-import { useAuth } from "../../src/contexts/AuthContext";
+import { Link, useNavigation, useRouter } from "expo-router";
+import { AuthContext } from '../../src/contexts/AuthContext';
 
 const LoginScreen = () => {
+  const { login, loading } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const { login, loading } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const handleLogin = async () => {
-    try {
-      setError("");
-      await login(email, password);
-    } catch (error) {
-      setError(error.message || "Login failed");
-    }
-  };
-
-  const handleGoogleLogin = () => {
-    console.log("Google login initiated");
-  };
   const navigation = useNavigation();
+  const router = useRouter();
 
   useEffect(() => {
     navigation.setOptions({
@@ -38,60 +31,133 @@ const LoginScreen = () => {
     });
   }, []);
 
+  const validateForm = () => {
+    Keyboard.dismiss();
+    const newErrors = {};
+
+    if (!email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Email is invalid';
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleLogin = async () => {
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    try {
+      await login(email, password);
+      router.push('/');
+    } catch (error) {
+      Alert.alert(
+        "Login Failed",
+        error?.message || "Please check your credentials and try again.",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#3B82F6" />
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 relative">
-      {/* Background Image with Opacity */}
       <Image
         source={require("../../assets/loginpic.jpg")}
         className="absolute w-full h-full"
         style={{ opacity: 0.1 }}
       />
 
-      {/* Content Container */}
       <View className="flex-1 justify-center px-8">
-        {/* Login Form Container */}
         <View className="bg-blue-200/35 p-8 rounded-3xl shadow-lg backdrop-blur-lg">
-          {/* Header */}
           <Text className="text-3xl font-bold text-center mb-8 text-blue-900">
             Welcome Back
           </Text>
 
-          {/* Email Input */}
-          <View className="bg-white/90 rounded-xl shadow-sm mb-4 overflow-hidden">
-            <View className="flex-row items-center px-4 py-3">
-              <FontAwesome name="envelope" size={20} color="#3B82F6" />
-              <TextInput
-                className="flex-1 ml-3 text-base text-gray-800"
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
+          <View className="space-y-4">
+            <View>
+              <View className="bg-white/90 rounded-xl shadow-sm overflow-hidden">
+                <View className="flex-row items-center px-4 py-3">
+                  <FontAwesome name="envelope" size={20} color="#3B82F6" />
+                  <TextInput
+                    className="flex-1 ml-3 text-base text-gray-800"
+                    placeholder="Email"
+                    value={email}
+                    onChangeText={(text) => {
+                      setEmail(text);
+                      setErrors({ ...errors, email: '' });
+                    }}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    editable={!isSubmitting}
+                  />
+                </View>
+              </View>
+              {errors.email && (
+                <Text className="text-red-500 text-sm ml-2 mt-1">{errors.email}</Text>
+              )}
+            </View>
+
+            <View>
+              <View className="bg-white/90 rounded-xl shadow-sm mt-4 overflow-hidden">
+                <View className="flex-row items-center px-4 py-3">
+                  <FontAwesome name="lock" size={20} color="#3B82F6" />
+                  <TextInput
+                    className="flex-1 ml-3 text-base text-gray-800"
+                    placeholder="Password"
+                    value={password}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      setErrors({ ...errors, password: '' });
+                    }}
+                    secureTextEntry={!showPassword}
+                    editable={!isSubmitting}
+                  />
+                  <TouchableOpacity onPress={togglePasswordVisibility}>
+                    <FontAwesome 
+                      name={showPassword ? "eye-slash" : "eye"} 
+                      size={20} 
+                      color="#3B82F6" 
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              {errors.password && (
+                <Text className="text-red-500 text-sm ml-2 mt-1">{errors.password}</Text>
+              )}
             </View>
           </View>
 
-          {/* Password Input */}
-          <View className="bg-white/90 rounded-xl shadow-sm mb-6 overflow-hidden">
-            <View className="flex-row items-center px-4 py-3">
-              <FontAwesome name="lock" size={20} color="#3B82F6" />
-              <TextInput
-                className="flex-1 ml-3 text-base text-gray-800"
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
-            </View>
-          </View>
-
-          {/* Login Button */}
           <TouchableOpacity
-            className="bg-blue-600 rounded-xl py-4 mb-4"
+            className={`${
+              isSubmitting ? 'bg-blue-400' : 'bg-blue-600'
+            } rounded-xl py-4 mt-6 mb-4`}
             onPress={handleLogin}
+            disabled={isSubmitting}
           >
-            {loading ? (
-              <ActivityIndicator size="large" color="#FFF" />
+            {isSubmitting ? (
+              <ActivityIndicator color="white" />
             ) : (
               <Text className="text-white text-center text-lg font-bold">
                 Sign In
@@ -99,21 +165,14 @@ const LoginScreen = () => {
             )}
           </TouchableOpacity>
 
-          {error ? (
-            <Text className="text-red-600 text-center mt-2">{error}</Text>
-          ) : null}
-
-          {/* Divider */}
           <View className="flex-row items-center my-4">
             <View className="flex-1 h-0.5 bg-gray-300" />
             <Text className="mx-4 text-gray-500">or</Text>
             <View className="flex-1 h-0.5 bg-gray-300" />
           </View>
 
-          {/* Google Login Button */}
           <TouchableOpacity
             className="bg-white rounded-xl py-4 flex-row justify-center items-center border border-gray-200"
-            onPress={handleGoogleLogin}
           >
             <FontAwesome name="google" size={20} color="#DB4437" />
             <Text className="text-gray-700 font-semibold ml-3">
@@ -123,7 +182,7 @@ const LoginScreen = () => {
         </View>
 
         <View className="flex justify-center items-center">
-          <Link href="/" className="text-blue-500  font-semibold mt-4">
+          <Link href="/" className="text-blue-500 font-semibold mt-4">
             Go to home
           </Link>
         </View>
