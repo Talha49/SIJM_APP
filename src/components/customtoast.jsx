@@ -40,7 +40,8 @@ const toastTypes = {
 const Toast = ({ message, type = 'info', onClose, autoClose = true, duration = 3000 }) => {
   const translateY = new Animated.Value(-100);
   const opacity = new Animated.Value(0);
-  const toastStyle = toastTypes[type];
+  const toastStyle = toastTypes[type] || toastTypes.info;
+
 
   useEffect(() => {
     // Slide in animation
@@ -114,9 +115,14 @@ export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = React.useState([]);
 
   const showToast = (message, type = 'info') => {
+    if (!toastTypes[type]) {
+      console.warn(`Invalid toast type: "${type}". Defaulting to "info".`);
+      type = 'info';
+    }
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, type }]);
   };
+  
 
   const removeToast = (id) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));

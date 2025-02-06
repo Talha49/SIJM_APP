@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { format, differenceInDays } from 'date-fns';
 
 import { AuthContext } from '../contexts/AuthContext';
-import { fetchTasks } from '../redux/Slices/Fields';
+import { fetchTasks, resetFieldState } from '../redux/Slices/Fields';
 import TaskDialog from './TaskDialog';
 
 const Home = () => {
@@ -17,9 +17,16 @@ const Home = () => {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
 
+ 
+
+
   useEffect(() => {
-    dispatch(fetchTasks(user?.id));
-  }, [user?.id, dispatch]);
+    if (user?.id) {
+      dispatch(fetchTasks(user?.id));
+    } else {
+      dispatch(resetFieldState()); // Ensure clean state on no user
+    }
+  }, [user, dispatch]);
 
   const taskMetrics = useMemo(() => {
     const now = new Date();

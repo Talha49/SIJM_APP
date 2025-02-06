@@ -82,7 +82,17 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await api.post("/auth/login", { email, password });
+      console.log("Full login response:", JSON.stringify(response.data, null, 2));
+
       const { token: newToken, user: userData } = response.data;
+      console.log("User object details:", {
+        id: userData.id,
+        email: userData.email,
+        fullName: userData.fullName,
+        contact: userData.contact,
+        image: userData.image,
+
+      });
 
       await storeSession(newToken, userData);
       setToken(newToken);

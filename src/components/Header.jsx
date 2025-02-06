@@ -3,12 +3,15 @@ import { View, Text, TouchableOpacity, Image, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRouter } from "expo-router";
 import { AuthContext } from "../contexts/AuthContext";
+import { resetFieldState } from "../redux/Slices/Fields";
+import { useDispatch } from "react-redux";
 
 export default function Header() {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
-  const navigation = useNavigation();
   const router = useRouter();
   const { user, logout } = useContext(AuthContext);
+   
+  const dispatch = useDispatch();
 
   const toggleDialog = () => {
     setIsDialogVisible(!isDialogVisible);
@@ -30,6 +33,7 @@ export default function Header() {
       );
     }
 
+     console.log(user);
     // If user is logged in but no image, show default image from assets
     return (
       <Image
@@ -96,32 +100,48 @@ export default function Header() {
 
             {/* Action Buttons */}
             <View className="p-4">
-              {user ? (
-                <TouchableOpacity
-                  onPress={() => {
-                    logout();
-                    toggleDialog();
-                  }}
-                  className="bg-red-500 py-2 rounded-lg"
-                >
-                  <Text className="text-white text-center font-semibold">
-                    Logout
-                  </Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={() => {
-                    router.push("/screens/login");
-                    toggleDialog();
-                  }}
-                  className="bg-blue-500 py-2 rounded-lg"
-                >
-                  <Text className="text-white text-center font-semibold">
-                    Login
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
+  {user ? (
+    <View className="flex-row gap-4">
+      <TouchableOpacity
+        onPress={() => {
+          router.push("/screens/profile"); // Navigate to Profile screen
+          toggleDialog();
+        }}
+        className="bg-green-500 flex-1 py-2 rounded-lg"
+      >
+        <Text className="text-white text-center font-semibold">
+          Profile
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => {
+          logout();
+          dispatch(resetFieldState());
+          toggleDialog();
+        }}
+        className="bg-red-500 flex-1 py-2 rounded-lg"
+      >
+        <Text className="text-white text-center font-semibold">
+          Logout
+        </Text>
+      </TouchableOpacity>
+    </View>
+  ) : (
+    <TouchableOpacity
+      onPress={() => {
+        router.push("/screens/login");
+        toggleDialog();
+      }}
+      className="bg-blue-500 py-2 rounded-lg"
+    >
+      <Text className="text-white text-center font-semibold">
+        Login
+      </Text>
+    </TouchableOpacity>
+  )}
+</View>
+
           </View>
         </>
       )}

@@ -36,6 +36,13 @@ const TaskList = () => {
   const { tasks, loading, error } = useSelector((state) => state.field);
   const { showToast } = useToast();
 
+    const navigation = useNavigation();
+  
+    useEffect(() => {
+      navigation.setOptions({
+        headerShown: false,
+      });
+    }, []);
   // Authentication check
   const checkAuthentication = () => {
     if (!user?.id) {

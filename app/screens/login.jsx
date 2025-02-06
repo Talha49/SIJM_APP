@@ -1,3 +1,4 @@
+
 // LoginScreen.js
 import React, { useContext, useEffect, useState } from "react";
 import {
@@ -13,6 +14,7 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { Link, useNavigation, useRouter } from "expo-router";
 import { AuthContext } from '../../src/contexts/AuthContext';
+import ForgotPasswordModal from "../../src/constants/ForgotPassword";
 
 const LoginScreen = () => {
   const { login, loading } = useContext(AuthContext);
@@ -21,6 +23,8 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isForgotPasswordVisible, setIsForgotPasswordVisible] = useState(false);
+
 
   const navigation = useNavigation();
   const router = useRouter();
@@ -164,6 +168,14 @@ const LoginScreen = () => {
               </Text>
             )}
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => setIsForgotPasswordVisible(true)}>
+        <Text>Forgot Password?</Text>
+      </TouchableOpacity>
+
+      <ForgotPasswordModal 
+        isVisible={isForgotPasswordVisible}
+        onClose={() => setIsForgotPasswordVisible(false)}
+      />
 
           <View className="flex-row items-center my-4">
             <View className="flex-1 h-0.5 bg-gray-300" />
@@ -192,3 +204,5 @@ const LoginScreen = () => {
 };
 
 export default LoginScreen;
+
+

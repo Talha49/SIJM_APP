@@ -240,7 +240,7 @@ const CreateTaskScreen = () => {
 
   const handleSubmit = async () => {
     // Validation
-    if (!formData.description || !formData.priority || !formData.status || !formData.dueDate || !formData.room || !formData.floor || formData.tags.length === 0 || formData.groundFloorImages.length === 0 || formData.lastFloorImages.length === 0 || formData.attachments.length === 0 ) { 
+    if (!formData.description || !formData.priority || !formData.status || !formData.dueDate || !formData.room || !formData.floor || formData.tags.length === 0 || formData.groundFloorImages.length === 0 || formData.lastFloorImages.length === 0 ) { 
       showToast("Please fill description and priority", "error");
       return;
     }
