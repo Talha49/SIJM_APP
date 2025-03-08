@@ -248,7 +248,7 @@ const CreateTaskScreen = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://192.168.100.21:3000/api/New/CreateTask",
+        "http:// 192.168.18.146:3000/api/New/CreateTask",
         formData,
         {
           headers: {

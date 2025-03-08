@@ -49,7 +49,7 @@ const ProfileScreen = () => {
   const fetchUserData = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.100.21:3000/api/users/getusersmobile?email=${formData.email}`
+        `http://192.168.18.146:3000/api/users/getusersmobile?email=${formData.email}`
       );
       if (response.status === 200) {
         const updatedUser = response.data.user;
@@ -127,7 +127,7 @@ const ProfileScreen = () => {
       };
 
       const response = await axios.post(
-        "http://192.168.100.21:3000/api/updateProfile",
+        "http://192.168.18.146:3000/api/updateProfile",
         updateData,
         { headers: { "Content-Type": "application/json" } }
       );

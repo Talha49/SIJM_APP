@@ -1,7 +1,8 @@
 {
   "expo": {
+    "owner": "ghauritalha",
     "name": "my-app",
-    "slug": "my-app",
+        "slug": "my-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/SIJM-LOGO.png",
@@ -24,15 +25,26 @@
     "ios": {
       "supportsTablet": true
     },
-    "android": {
+  "android": {
+      "package": "com.sijm.app", 
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
-    },
+      }},
+      
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "scheme": "myapp" 
+    "scheme": "myapp",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "0fd94348-eac7-42cb-8909-8e399e9b2211"
+      },
+      "androidClientId": "1048483058759-uiv9rg7cni518kq2ij5uhjhilhfdl4ah.apps.googleusercontent.com",
+      "expoClientId": "1048483058759-hduec78p110nuf8i1lsh5g7u3fse3huf.apps.googleusercontent.com"
+    }
   }
 }

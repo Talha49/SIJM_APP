@@ -78,7 +78,7 @@ const TaskDialog = ({ visible, task, onClose, showEditButton=true}) => {
     try {
       setLoading(true)
       const response = await axios.put(
-        `http://192.168.100.21:3000/api/New/UpdateTask/${task._id}`,
+        `http://192.168.18.146:3000/api/New/UpdateTask/${task._id}`,
         {
           ...task,
           ...editedTask,

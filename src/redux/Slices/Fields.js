@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // Define the API base URL
-const API_URL = "http://192.168.100.21:3000/api/New";
+const API_URL = "http://192.168.18.146:3000/api/New";
 
 // Fetch tasks by user ID
 export const fetchTasks = createAsyncThunk("field/fetchTasks", async (userId, { rejectWithValue }) => {

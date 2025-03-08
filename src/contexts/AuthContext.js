@@ -1,17 +1,16 @@
 // AuthContext.js
 import React, { createContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from 'axios';
+import axios from "axios";
 
 export const AuthContext = createContext();
 
-const API_URL = "http://192.168.100.21:3000/api";
+const API_URL = "http://192.168.18.146:3000/api";
 
-// Create axios instance with default config
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -24,8 +23,8 @@ export const AuthProvider = ({ children }) => {
     loadStoredSession();
   }, []);
 
-  // Configure axios interceptor for token handling
   useEffect(() => {
+    // Add interceptors to attach token and handle 401 responses
     api.interceptors.request.use(
       (config) => {
         if (token) {
@@ -33,9 +32,7 @@ export const AuthProvider = ({ children }) => {
         }
         return config;
       },
-      (error) => {
-        return Promise.reject(error);
-      }
+      (error) => Promise.reject(error)
     );
 
     api.interceptors.response.use(
@@ -55,7 +52,6 @@ export const AuthProvider = ({ children }) => {
         AsyncStorage.getItem("authToken"),
         AsyncStorage.getItem("user"),
       ]);
-
       if (storedToken && storedUser) {
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
@@ -79,28 +75,40 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Email/password login function
   const login = async (email, password) => {
     try {
       const response = await api.post("/auth/login", { email, password });
-      console.log("Full login response:", JSON.stringify(response.data, null, 2));
-
       const { token: newToken, user: userData } = response.data;
-      console.log("User object details:", {
-        id: userData.id,
-        email: userData.email,
-        fullName: userData.fullName,
-        contact: userData.contact,
-        image: userData.image,
-
-      });
-
       await storeSession(newToken, userData);
       setToken(newToken);
       setUser(userData);
-
       return response.data;
     } catch (error) {
-      const message = error.response?.data?.message || "Login failed. Please try again.";
+      const message =
+        error.response?.data?.message ||
+        "Login failed. Please try again.";
+      throw new Error(message);
+    }
+  };
+
+  // Google social login function
+  // This function should be called with the idToken you receive from expo-auth-session.
+  const googleLogin = async (idToken) => {
+    try {
+      const response = await api.post("/auth/google", {
+        provider: "google",
+        idToken,
+      });
+      const { token: newToken, user: userData } = response.data;
+      await storeSession(newToken, userData);
+      setToken(newToken);
+      setUser(userData);
+      return response.data;
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        "Google login failed. Please try again.";
       throw new Error(message);
     }
   };
@@ -124,6 +132,7 @@ export const AuthProvider = ({ children }) => {
     token,
     loading,
     login,
+    googleLogin, // Expose the googleLogin function for social login
     logout,
   };
 
