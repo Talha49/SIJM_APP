@@ -38,13 +38,13 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Dashboard Tab */}
+      {/* Inspector Tab */}
       <Tabs.Screen
-        name="Dashboard"
+        name="Inspector"
         options={{
-          title: 'Dashboard',
+          title: 'Inspector',
           tabBarIcon: ({ color, size }) => (
-            <FontAwesome name="bar-chart" size={size} color={color} />
+            <FontAwesome name="eye" size={size} color={color} />
           ),
         }}
       />
