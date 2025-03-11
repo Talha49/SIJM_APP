@@ -64,7 +64,7 @@ const Dashboard = () => {
             <LinearGradient
               colors={option.gradient}
               className="rounded-3xl p-5 items-center justify-center shadow-2xl"
-              style={{ height: width * 0.45 }}
+              style={{ height: width * 0.6 }}
             >
               <View className="bg-white/20 rounded-full p-4 mb-3">
                 {option.icon}
