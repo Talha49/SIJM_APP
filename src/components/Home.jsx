@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { format, differenceInDays } from 'date-fns';
 
 import { AuthContext } from '../contexts/AuthContext';
-import { fetchTasks, resetFieldState } from '../redux/Slices/Fields';
+import { fetchAssignedTasks, fetchTasks, resetFieldState } from '../redux/Slices/Fields';
 import TaskDialog from './TaskDialog';
 
 const Home = () => {
@@ -14,6 +14,7 @@ const Home = () => {
   const { user } = useContext(AuthContext);
   const dispatch = useDispatch();
   const { tasks } = useSelector((state) => state.field);
+  const { assignedTasks } = useSelector((state) => state.field);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
 
@@ -22,46 +23,40 @@ const Home = () => {
 
   useEffect(() => {
     if (user?.id) {
-      dispatch(fetchTasks(user?.id));
+      dispatch(fetchTasks(user.id));
+      dispatch(fetchAssignedTasks());
     } else {
-      dispatch(resetFieldState()); // Ensure clean state on no user
+      dispatch(resetFieldState()); 
     }
   }, [user, dispatch]);
+  
+  const assignedTasksLength = useMemo(() => 
+    assignedTasks.filter(task => 
+      task.assignees?.some(assignee => assignee.name === user?.fullName)
+    ), 
+    [assignedTasks, user]
+  );
+  
 
   const taskMetrics = useMemo(() => {
     const now = new Date();
-
     const completedTasks = tasks.filter(task => task.status === 'Completed');
     const pendingTasks = tasks.filter(task => task.status === 'Pending');
     const farDeadlineTasks = tasks.filter(task => {
       const dueDate = new Date(task.dueDate);
       return differenceInDays(dueDate, now) >= 7;
     });
-
+  
     return [
-      { 
-        title: 'Total Tasks', 
-        count: tasks.length, 
-        icon: 'tasks' 
-      },
-      { 
-        title: 'Completed', 
-        count: completedTasks.length, 
-        icon: 'check-circle' 
-      },
-      { 
-        title: 'Pending', 
-        count: pendingTasks.length, 
-        icon: 'clock-o' 
-      },
-      { 
-        title: 'Future Tasks', 
-        count: farDeadlineTasks.length, 
-        icon: 'calendar' 
-      }
+      { title: 'Total Tasks', count: tasks.length, icon: 'tasks' },
+      { title: 'Completed', count: completedTasks.length, icon: 'check-circle' },
+      { title: 'Assigned', count: assignedTasksLength.length, icon: 'briefcase' },
+      { title: 'Pending', count: pendingTasks.length, icon: 'clock-o' },
+      // { title: 'Future Tasks', count: farDeadlineTasks.length, icon: 'calendar' }
     ];
-  }, [tasks]);
+  }, [tasks, assignedTasksLength]);
 
+  
   const displayTasks = useMemo(() => {
     const getHighPriorityTask = (status) => {
       return tasks
@@ -187,7 +182,7 @@ const Home = () => {
         ))}
       </View>
 
-      <View className="mx-4 mt-4 bg-white rounded-xl shadow p-4">
+      {/* <View className="mx-4 mt-4 bg-white rounded-xl shadow p-4">
         <View className="flex-row justify-between items-center mb-4">
           <Text className="text-lg font-bold">Live Monitoring</Text>
           <View className="flex-row items-center">
@@ -201,11 +196,11 @@ const Home = () => {
             <Text className="text-white font-medium">View Live Feed</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </View> */}
 
       <View className="mx-4 mt-6">
         <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-lg font-bold">Priority Tasks</Text>
+          <Text className="text-lg font-bold">Tasks List</Text>
           <TouchableOpacity onPress={() => router.push('/(tabs)/Fields')}>
   <Text className="text-blue-500">View All</Text>
 </TouchableOpacity>

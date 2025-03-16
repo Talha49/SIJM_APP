@@ -15,7 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import TaskDialog from '../../src/components/TaskDialog';
 import { AuthContext } from '../../src/contexts/AuthContext';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteTask, fetchTasks } from '../../src/redux/Slices/Fields';
+import { deleteTask, fetchAssignedTasks, fetchTasks } from '../../src/redux/Slices/Fields';
 import { useRouter } from 'expo-router';
 import { useToast } from '../../src/components/customtoast';
 
@@ -60,7 +60,7 @@ const TaskList = () => {
     try {
         setIsLoading(true);
         setErrorMessage('');
-        const result = await dispatch(fetchTasks(user.id)).unwrap();
+        const result = await dispatch(fetchAssignedTasks()).unwrap();
 
         // Filter tasks where user.fullName exists in task.assignees
         const filteredTasks = result.filter(task =>

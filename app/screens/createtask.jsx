@@ -20,6 +20,7 @@ import { AuthContext } from "../../src/contexts/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { useToast } from "../../src/components/customtoast";
+import { API_URL } from "../../src/redux/Slices/Fields";
 
 const CreateTaskScreen = () => {
   const { user } = useContext(AuthContext);
@@ -248,7 +249,7 @@ const CreateTaskScreen = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http:// 192.168.18.146:3000/api/New/CreateTask",
+        "http://192.168.100.174:3000/api/New/CreateTask",
         formData,
         {
           headers: {
