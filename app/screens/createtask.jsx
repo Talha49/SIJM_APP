@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator"; // Import for compression
 import * as DocumentPicker from "expo-document-picker";
 import axios from "axios";
 import { Chip } from "react-native-paper";
@@ -45,16 +46,15 @@ const CreateTaskScreen = () => {
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [newTag, setNewTag] = useState("");
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
+  const [imageType, setImageType] = useState("");
 
   const navigation = useNavigation();
-
   const { showToast } = useToast();
 
   useEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
+    navigation.setOptions({ headerShown: false });
+    requestPermissions();
   }, []);
 
   const priorityOptions = [
@@ -69,17 +69,27 @@ const CreateTaskScreen = () => {
     { label: "Completed", color: "green" },
   ];
 
-  const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const requestPermissions = async () => {
+    const cameraPerm = await ImagePicker.requestCameraPermissionsAsync();
+    const mediaPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!cameraPerm.granted || !mediaPerm.granted) {
+      Alert.alert("Permission Required", "Camera and gallery access are needed.");
+    }
   };
 
-  const requestMediaPermission = async () => {
-    if (Platform.OS !== "web") {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      return status === "granted";
+  const compressImage = async (uri) => {
+    try {
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 1024 } }], // Resize to max width of 1024px (height scales proportionally)
+        { compress: 0.8, format: "jpeg", base64: true } // 80% quality, output as JPEG
+      );
+      return manipulatedImage;
+    } catch (error) {
+      console.error("Image compression error:", error);
+      Alert.alert("Error", "Failed to compress image");
+      return { uri }; // Fallback to original if compression fails
     }
-    return true;
   };
 
   const convertToBase64 = async (uri) => {
@@ -95,88 +105,98 @@ const CreateTaskScreen = () => {
       });
     } catch (error) {
       console.error("Base64 conversion error:", error);
-      Alert.alert("Error", "Failed to process file");
+      Alert.alert("Error", "Failed to process image");
       return null;
     }
   };
 
-  const pickGroundFloorImages = async () => {
-    const hasPermission = await requestMediaPermission();
-    if (!hasPermission) {
-      Alert.alert("Permission Denied", "Camera roll permissions required.");
-      return;
-    }
+  const showImageSourceOptions = (type) => {
+    setImageType(type);
+    Alert.alert(
+      "Select Image Source",
+      "Choose how to add the image:",
+      [
+        { text: "Camera", onPress: () => captureImage(type) },
+        { text: "Gallery", onPress: () => pickImageFromGallery(type) },
+        { text: "Cancel", style: "cancel" },
+      ]
+    );
+  };
 
+  const captureImage = async (type) => {
     try {
-      let result = await ImagePicker.launchImageLibraryAsync({
+      const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsMultipleSelection: true,
         quality: 1,
       });
 
       if (!result.canceled) {
         const processedImages = await Promise.all(
           result.assets.map(async (asset) => {
-            const base64 = await convertToBase64(asset.uri);
+            const compressedImage = await compressImage(asset.uri);
+            const base64 = compressedImage.base64
+              ? `data:image/jpeg;base64,${compressedImage.base64}`
+              : await convertToBase64(compressedImage.uri);
             return {
-              uri: asset.uri,
-              name: asset.fileName || `ground_floor_${Date.now()}.jpg`,
+              uri: compressedImage.uri,
+              name: `${type}_${Date.now()}.jpg`,
               base64: base64,
             };
           })
         );
 
-        setFormData((prev) => ({
-          ...prev,
-          groundFloorImages: [...prev.groundFloorImages, ...processedImages],
-        }));
+        updateImageState(type, processedImages);
       }
     } catch (error) {
-      console.error("Ground Floor Images Error:", error);
-      Alert.alert("Error", "Failed to pick ground floor images");
+      console.error(`Camera Error (${type}):`, error);
+      Alert.alert("Error", "Failed to capture image");
     }
   };
 
-  const pickLastFloorImage = async () => {
-    const hasPermission = await requestMediaPermission();
-    if (!hasPermission) {
-      Alert.alert("Permission Denied", "Camera roll permissions required.");
-      return;
-    }
-
+  const pickImageFromGallery = async (type) => {
     try {
-      let result = await ImagePicker.launchImageLibraryAsync({
+      const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsMultipleSelection: false,
+        allowsMultipleSelection: type === "groundFloorImages",
         quality: 1,
       });
 
       if (!result.canceled) {
-        const processedImage = await Promise.all(
+        const processedImages = await Promise.all(
           result.assets.map(async (asset) => {
-            const base64 = await convertToBase64(asset.uri);
+            const compressedImage = await compressImage(asset.uri);
+            const base64 = compressedImage.base64
+              ? `data:image/jpeg;base64,${compressedImage.base64}`
+              : await convertToBase64(compressedImage.uri);
             return {
-              uri: asset.uri,
-              name: asset.fileName || `last_floor_${Date.now()}.jpg`,
+              uri: compressedImage.uri,
+              name: asset.fileName || `${type}_${Date.now()}.jpg`,
               base64: base64,
             };
           })
         );
 
-        setFormData((prev) => ({
-          ...prev,
-          lastFloorImages: processedImage,
-        }));
+        updateImageState(type, processedImages);
       }
     } catch (error) {
-      console.error("Last Floor Images Error:", error);
-      Alert.alert("Error", "Failed to pick last floor image");
+      console.error(`Gallery Error (${type}):`, error);
+      Alert.alert("Error", "Failed to pick image from gallery");
     }
+  };
+
+  const updateImageState = (type, newImages) => {
+    setFormData((prev) => ({
+      ...prev,
+      [type]:
+        type === "groundFloorImages"
+          ? [...prev.groundFloorImages, ...newImages]
+          : newImages,
+    }));
   };
 
   const pickAttachments = async () => {
     try {
-      let result = await DocumentPicker.getDocumentAsync({
+      const result = await DocumentPicker.getDocumentAsync({
         type: "*/*",
         multiple: true,
       });
@@ -184,19 +204,13 @@ const CreateTaskScreen = () => {
       if (result.type !== "cancel") {
         const processedAttachments = await Promise.all(
           (result.assets || [result]).map(async (file) => {
-            // Normalize file object properties
             const fileUri = file.uri || file.path;
             const fileName =
               file.name || file.fileName || `attachment_${Date.now()}`;
-            const fileType = file.type || "";
-
-            // Convert ALL files to base64, not just images
             const base64 = await convertToBase64(fileUri);
-
             return {
               uri: fileUri,
               name: fileName,
-              type: fileType,
               base64: base64,
             };
           })
@@ -208,8 +222,7 @@ const CreateTaskScreen = () => {
         }));
       }
     } catch (error) {
-      console.error("Attachment Pick Error:", error);
-      console.error("Error Details:", JSON.stringify(error, null, 2));
+      console.error("Attachment Error:", error);
       Alert.alert("Error", "Failed to pick attachments");
     }
   };
@@ -240,64 +253,80 @@ const CreateTaskScreen = () => {
   };
 
   const handleSubmit = async () => {
-    // Validation
-    if (!formData.description || !formData.priority || !formData.status || !formData.dueDate || !formData.room || !formData.floor || formData.tags.length === 0 || formData.groundFloorImages.length === 0 || formData.lastFloorImages.length === 0 ) { 
-      showToast("Please fill description and priority", "error");
+    if (
+      !formData.description ||
+      !formData.priority ||
+      !formData.status ||
+      !formData.dueDate ||
+      !formData.room ||
+      !formData.floor ||
+      formData.tags.length === 0 ||
+      formData.groundFloorImages.length === 0 ||
+      formData.lastFloorImages.length === 0
+    ) {
+      showToast("Please fill all required fields", "error");
       return;
     }
-   
+
     setLoading(true);
     try {
+      console.log("Request data size:", JSON.stringify(formData).length);
       const response = await axios.post(
         "http://192.168.100.174:3000/api/New/CreateTask",
         formData,
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          timeout: 30000,
+          headers: { "Content-Type": "application/json" },
+          timeout: 60000,
         }
       );
 
+      console.log("Response:", response.status, response.data);
       showToast("Task created successfully", "success");
-
-      // Reset form
-      setFormData({
-        userId: "",
-        username: "ABC",
-        description: "",
-        priority: "",
-        room: "",
-        floor: "",
-        status: "",
-        tags: ["untagged"],
-        assignees: [],
-        dueDate: new Date(),
-        groundFloorImages: [],
-        lastFloorImages: [],
-        attachments: [],
-        emailAlerts: [],
-        watchers: [],
-      });
+      resetForm();
     } catch (error) {
-      console.error("Upload Error:", error.response?.data || error);
-      showToast(error.response?.data?.error || "Failed to upload task", "info");
+      console.error("Upload Error:", {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      showToast(
+        error.response?.data?.error || "Network Error - Failed to upload task",
+        "error"
+      );
     } finally {
-      setLoading(false); // Stop loadi
+      setLoading(false);
     }
   };
 
-  const renderFilePickerWindow = (type, onPress, title) => {
+  const resetForm = () => {
+    setFormData({
+      userId: user?.id,
+      creatorId: user?.id,
+      username: user?.fullName || "No Name",
+      description: "",
+      priority: "",
+      room: "",
+      floor: "",
+      status: "",
+      tags: [],
+      assignees: [],
+      dueDate: new Date(),
+      groundFloorImages: [],
+      lastFloorImages: [],
+      attachments: [],
+      emailAlerts: [],
+      watchers: [],
+    });
+  };
+
+  const renderFilePickerWindow = (type, title) => {
     return (
       <TouchableOpacity
-        onPress={onPress}
+        onPress={() => showImageSourceOptions(type)}
         className="w-full h-40 border-2 border-dashed border-gray-300 rounded-lg items-center justify-center mb-4"
       >
-        <MaterialIcons
-          name={type === "attachments" ? "attach-file" : "photo-camera"}
-          size={50}
-          color="gray"
-        />
+        <MaterialIcons name="photo-camera" size={50} color="gray" />
         <Text className="text-gray-500 mt-2 text-center">{title}</Text>
       </TouchableOpacity>
     );
@@ -308,23 +337,10 @@ const CreateTaskScreen = () => {
       <ScrollView horizontal className="mt-2 mb-4">
         {formData[type].map((file, index) => (
           <View key={index} className="relative mr-2">
-            {file.type?.startsWith("image/") || type.includes("Images") ? (
-              <Image
-                source={{ uri: file.uri }}
-                className="w-32 h-32 rounded-lg"
-              />
-            ) : (
-              <View className="w-32 h-32 bg-gray-200 rounded-lg items-center justify-center p-2">
-                <MaterialIcons
-                  name="insert-drive-file"
-                  size={40}
-                  color="gray"
-                />
-                <Text className="text-xs text-center mt-2" numberOfLines={2}>
-                  {file.name}
-                </Text>
-              </View>
-            )}
+            <Image
+              source={{ uri: file.uri }}
+              className="w-32 h-32 rounded-lg"
+            />
             <TouchableOpacity
               onPress={() => removeFile(type, index)}
               className="absolute top-0 right-0 bg-red-500 rounded-full w-6 h-6 items-center justify-center"
@@ -368,14 +384,11 @@ const CreateTaskScreen = () => {
               }`}
             >
               <Text
-                className={`
-                text-base font-semibold 
-                ${
+                className={`text-base font-semibold ${
                   formData.priority === option.label
                     ? "text-white"
                     : "text-gray-700"
-                }
-              `}
+                }`}
               >
                 {option.label}
               </Text>
@@ -396,14 +409,11 @@ const CreateTaskScreen = () => {
               }`}
             >
               <Text
-                className={`
-                text-base font-semibold 
-                ${
+                className={`text-base font-semibold ${
                   formData.status === option.label
                     ? "text-white"
                     : "text-gray-700"
-                }
-              `}
+                }`}
               >
                 {option.label}
               </Text>
@@ -476,6 +486,7 @@ const CreateTaskScreen = () => {
           />
         )}
 
+        {/* Ground Floor Images Section */}
         <View className="mb-4">
           <Text className="text-lg font-semibold mb-2">
             Ground Floor Images
@@ -483,13 +494,12 @@ const CreateTaskScreen = () => {
           {formData.groundFloorImages.length === 0
             ? renderFilePickerWindow(
                 "groundFloorImages",
-                pickGroundFloorImages,
                 "Select Ground Floor Images"
               )
             : renderFilePreview("groundFloorImages")}
           {formData.groundFloorImages.length > 0 && (
             <TouchableOpacity
-              onPress={pickGroundFloorImages}
+              onPress={() => showImageSourceOptions("groundFloorImages")}
               className="bg-blue-500 p-3 rounded-lg"
             >
               <Text className="text-white text-center">Add More Images</Text>
@@ -499,17 +509,16 @@ const CreateTaskScreen = () => {
 
         {/* Last Floor Images Section */}
         <View className="mb-4">
-          <Text className="text-lg font-semibold mb-2">Last Floor Images</Text>
+          <Text className="text-lg font-semibold mb-2">Last Floor Image</Text>
           {formData.lastFloorImages.length === 0
             ? renderFilePickerWindow(
                 "lastFloorImages",
-                pickLastFloorImage,
                 "Select Last Floor Image"
               )
             : renderFilePreview("lastFloorImages")}
           {formData.lastFloorImages.length > 0 && (
             <TouchableOpacity
-              onPress={pickLastFloorImage}
+              onPress={() => showImageSourceOptions("lastFloorImages")}
               className="bg-blue-500 p-3 rounded-lg"
             >
               <Text className="text-white text-center">Change Image</Text>
@@ -520,13 +529,19 @@ const CreateTaskScreen = () => {
         {/* Attachments Section */}
         <View className="mb-4">
           <Text className="text-lg font-semibold mb-2">Attachments</Text>
-          {formData.attachments.length === 0
-            ? renderFilePickerWindow(
-                "attachments",
-                pickAttachments,
-                "Select Attachments (PDF, TXT, JPG, etc.)"
-              )
-            : renderFilePreview("attachments")}
+          {formData.attachments.length === 0 ? (
+            <TouchableOpacity
+              onPress={pickAttachments}
+              className="w-full h-40 border-2 border-dashed border-gray-300 rounded-lg items-center justify-center mb-4"
+            >
+              <MaterialIcons name="attach-file" size={50} color="gray" />
+              <Text className="text-gray-500 mt-2 text-center">
+                Select Attachments (PDF, TXT, JPG, etc.)
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            renderFilePreview("attachments")
+          )}
           {formData.attachments.length > 0 && (
             <TouchableOpacity
               onPress={pickAttachments}
@@ -541,28 +556,40 @@ const CreateTaskScreen = () => {
 
         {/* Submit Button */}
         <TouchableOpacity
-  onPress={handleSubmit}
-  disabled={
-    formData.groundFloorImages.length === 0 ||
-    formData.tags === '' ||
-    formData.priority === '' ||
-    formData.status === ''
-  }
-  className={`bg-blue-500 p-4 rounded-lg flex-row items-center justify-center ${
-    loading ? "opacity-50" : ""
-  }`}
->
-  <Text className="text-white font-semibold text-lg flex-row items-center justify-center">
-    {loading ? (
-      <ActivityIndicator size="small" color="#fff" className="mr-2" />
-    ) : null}
-    Create
-  </Text>
-</TouchableOpacity>
-
+          onPress={handleSubmit}
+          disabled={
+            loading ||
+            !formData.description ||
+            !formData.priority ||
+            !formData.status ||
+            formData.tags.length === 0 ||
+            formData.groundFloorImages.length === 0 ||
+            formData.lastFloorImages.length === 0
+          }
+          className={`bg-blue-500 p-4 rounded-lg flex-row items-center justify-center ${
+            loading ||
+            !formData.description ||
+            !formData.priority ||
+            !formData.status ||
+            formData.tags.length === 0 ||
+            formData.groundFloorImages.length === 0 ||
+            formData.lastFloorImages.length === 0
+              ? "opacity-50"
+              : ""
+          }`}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#fff" className="mr-2" />
+          ) : null}
+          <Text className="text-white font-semibold text-lg">Create</Text>
+        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
+
+  function handleChange(field, value) {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  }
 };
 
 export default CreateTaskScreen;
