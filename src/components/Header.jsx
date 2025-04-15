@@ -10,7 +10,7 @@ export default function Header() {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const router = useRouter();
   const { user, logout } = useContext(AuthContext);
-   
+
   const dispatch = useDispatch();
 
   const toggleDialog = () => {
@@ -27,13 +27,13 @@ export default function Header() {
       return (
         <Image
           source={{ uri: user.image }}
-          className="h-8 w-8 rounded-full"
+          className="h-12 w-12 rounded-full"
           resizeMode="cover"
         />
       );
     }
 
-     console.log(user);
+    console.log(user);
     // If user is logged in but no image, show default image from assets
     return (
       <Image
@@ -47,22 +47,19 @@ export default function Header() {
   return (
     <View style={{ zIndex: 50 }}>
       {/* Header Container */}
-      <View className="flex-row justify-between items-center bg-blue-600 border-b-2 px-4 py-4">
+      <View className="flex-row justify-between items-center bg-blue-600 px-4 py-4">
         {/* App Logo and Name */}
         <View className="flex-row items-center">
           <Image
             source={require("../../assets/SIJM.webp")}
-            className="h-12 w-12 mr-2 rounded-full border-black/25 bg-slate-100 border-2"
+            className="h-12 w-12 mr-2 rounded-full bg-slate-100"
             resizeMode="contain"
           />
           <Text className="text-white text-lg font-bold">SIJM</Text>
         </View>
 
         {/* Profile Button */}
-        <TouchableOpacity 
-          onPress={toggleDialog}
-          className="active:opacity-80"
-        >
+        <TouchableOpacity onPress={toggleDialog} className="active:opacity-80">
           {renderProfileButton()}
         </TouchableOpacity>
       </View>
@@ -76,10 +73,10 @@ export default function Header() {
             style={{ zIndex: 48 }}
             onPress={toggleDialog}
           />
-          
+
           {/* Dialog Content */}
           <View
-            className="absolute top-16 right-4 bg-white shadow-lg rounded-lg overflow-hidden"
+            className="absolute top-20 right-4 bg-white shadow-lg rounded-lg overflow-hidden"
             style={{ zIndex: 49, width: 250 }}
           >
             {/* User Info Section */}
@@ -87,7 +84,11 @@ export default function Header() {
               <View className="items-center">
                 {user && (
                   <Image
-                    source={user.image ? { uri: user.image } : require("../../assets/pp.jpg")}
+                    source={
+                      user.image
+                        ? { uri: user.image }
+                        : require("../../assets/pp.jpg")
+                    }
                     className="h-16 w-16 rounded-full mb-3"
                     resizeMode="cover"
                   />
@@ -100,48 +101,49 @@ export default function Header() {
 
             {/* Action Buttons */}
             <View className="p-4">
-  {user ? (
-    <View className="flex-row gap-4">
-      <TouchableOpacity
-        onPress={() => {
-          router.push("/screens/profile"); // Navigate to Profile screen
-          toggleDialog();
-        }}
-        className="bg-green-500 flex-1 py-2 rounded-lg"
-      >
-        <Text className="text-white text-center font-semibold">
-          Profile
-        </Text>
-      </TouchableOpacity>
+              {user ? (
+                <View className="flex-row gap-4">
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      router.push("/screens/profile"); // Navigate to Profile screen
+                      toggleDialog();
+                    }}
+                    className="bg-blue-500 flex-1 py-2 rounded-lg"
+                  >
+                    <Text className="text-white text-center font-semibold">
+                      Profile
+                    </Text>
+                  </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => {
-          logout();
-          dispatch(resetFieldState());
-          toggleDialog();
-        }}
-        className="bg-red-500 flex-1 py-2 rounded-lg"
-      >
-        <Text className="text-white text-center font-semibold">
-          Logout
-        </Text>
-      </TouchableOpacity>
-    </View>
-  ) : (
-    <TouchableOpacity
-      onPress={() => {
-        router.push("/screens/login");
-        toggleDialog();
-      }}
-      className="bg-blue-500 py-2 rounded-lg"
-    >
-      <Text className="text-white text-center font-semibold">
-        Login
-      </Text>
-    </TouchableOpacity>
-  )}
-</View>
-
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      logout();
+                      dispatch(resetFieldState());
+                      toggleDialog();
+                    }}
+                    className="bg-red-500 flex-1 py-2 rounded-lg"
+                  >
+                    <Text className="text-white text-center font-semibold">
+                      Logout
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => {
+                    router.push("/screens/login");
+                    toggleDialog();
+                  }}
+                  className="bg-blue-500 py-2 rounded-lg"
+                >
+                  <Text className="text-white text-center font-semibold">
+                    Login
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         </>
       )}

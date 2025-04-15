@@ -9,23 +9,23 @@ export default function RootLayout() {
   return (
     <>
 
-    <Provider store={store}>
-    <ToastProvider> 
-    <AuthProvider>
-      {/* Global Header */}
-     <Header />
+      <Provider store={store}>
+        <ToastProvider>
+          <AuthProvider>
+            {/* Global Header */}
+            <Header />
 
-      {/* Screen Navigation */}
-      <Stack 
-     
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-        <Stack.Screen name="login" />
-      </Stack>
+            {/* Screen Navigation */}
+            <Stack
 
-      </AuthProvider>
-      </ToastProvider>
+            >
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+              <Stack.Screen name="login" />
+            </Stack>
+
+          </AuthProvider>
+        </ToastProvider>
       </Provider>
     </>
   );

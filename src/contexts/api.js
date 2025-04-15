@@ -2,7 +2,7 @@
 import axios from "axios";
 import { manipulateAsync } from 'expo-image-manipulator';
 
-const API_URL = "http://192.168.100.174:8000"; // Your server IP
+const API_URL = "http://192.168.1.21:8000"; // Your server IP
 
 /**
  * Uploads and processes an image for object detection

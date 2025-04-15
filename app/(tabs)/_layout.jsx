@@ -1,7 +1,7 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { Tabs } from "expo-router";
+import React from "react";
+import { Platform } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function TabLayout() {
   return (
@@ -10,7 +10,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: Platform.select({
           ios: {
-            position: 'absolute',
+            position: "absolute",
           },
           default: {},
         }),
@@ -20,7 +20,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: "Home",
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="home" size={size} color={color} />
           ),
@@ -31,7 +31,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="Fields"
         options={{
-          title: 'Fields',
+          title: "Fields",
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="tasks" size={size} color={color} />
           ),
@@ -42,9 +42,20 @@ export default function TabLayout() {
       <Tabs.Screen
         name="Inspector"
         options={{
-          title: 'Inspector',
+          title: "Inspector",
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="eye" size={size} color={color} />
+          ),
+        }}
+      />
+
+      {/* Shoot Video Tab */}
+      <Tabs.Screen
+        name="Shoot"
+        options={{
+          title: "Shoot",
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="camera-retro" size={size} color={color} />
           ),
         }}
       />
