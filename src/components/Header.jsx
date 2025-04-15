@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { View, Text, TouchableOpacity, Image, Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRouter } from "expo-router";
 import { AuthContext } from "../contexts/AuthContext";
 import { resetFieldState } from "../redux/Slices/Fields";
@@ -49,18 +49,21 @@ export default function Header() {
       {/* Header Container */}
       <View className="flex-row justify-between items-center bg-blue-600 px-4 py-4">
         {/* App Logo and Name */}
-        <View className="flex-row items-center">
+        <View className="flex-row items-center gap-4">
           <Image
             source={require("../../assets/SIJM.webp")}
-            className="h-12 w-12 mr-2 rounded-full bg-slate-100"
+            className="h-12 w-12 rounded-full bg-slate-100"
             resizeMode="contain"
           />
-          <Text className="text-white text-lg font-bold">SIJM</Text>
+          <Text className="text-white text-2xl font-semibold">SIJM</Text>
         </View>
 
         {/* Profile Button */}
         <TouchableOpacity onPress={toggleDialog} className="active:opacity-80">
-          {renderProfileButton()}
+          {/* {renderProfileButton()} */}
+          <View className="h-8 w-8 rounded-full items-center justify-center">
+            <FontAwesome name="ellipsis-v" color="white" size={20} />
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -69,7 +72,7 @@ export default function Header() {
         <>
           {/* Backdrop to close dialog when clicking outside */}
           <Pressable
-            className="absolute top-0 left-0 right-0 bottom-0"
+            className="absolute top-0 left-0 right-0"
             style={{ zIndex: 48 }}
             onPress={toggleDialog}
           />

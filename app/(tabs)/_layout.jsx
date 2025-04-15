@@ -1,9 +1,39 @@
 import { Tabs } from "expo-router";
-import React from "react";
-import { Platform } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import React, { useContext } from "react";
+import { Image, Platform, View } from "react-native";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { AuthContext } from "../../src/contexts/AuthContext";
 
 export default function TabLayout() {
+  const { user, logout } = useContext(AuthContext);
+
+  const renderProfileButton = () => {
+    if (!user) {
+      return <Ionicons name="person-circle-outline" size={28} color="white" />;
+    }
+
+    // If user is logged in and has an image, show their image
+    if (user.image) {
+      return (
+        <Image
+          source={{ uri: user.image }}
+          className="h-12 w-12 border-2 border-blue-500 rounded-full"
+          resizeMode="cover"
+        />
+      );
+    }
+
+    console.log(user);
+    // If user is logged in but no image, show default image from assets
+    return (
+      <Image
+        source={require("../../assets/pp.jpg")}
+        className="h-10 w-10 rounded-full"
+        resizeMode="cover"
+      />
+    );
+  };
+
   return (
     <Tabs
       screenOptions={{
@@ -12,7 +42,7 @@ export default function TabLayout() {
           ios: {
             position: "absolute",
           },
-          default: {},
+          default: {  },
         }),
       }}
     >
@@ -38,6 +68,18 @@ export default function TabLayout() {
         }}
       />
 
+      {/* Profile Tab */}
+      <Tabs.Screen
+        name="Profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => (
+            // <FontAwesome name="user-circle" size={size} color={color} />
+            <View className="absolute bottom-1/4">{renderProfileButton()}</View>
+          ),
+        }}
+      />
+
       {/* Inspector Tab */}
       <Tabs.Screen
         name="Inspector"
@@ -48,7 +90,6 @@ export default function TabLayout() {
           ),
         }}
       />
-
       {/* Shoot Video Tab */}
       <Tabs.Screen
         name="Shoot"
