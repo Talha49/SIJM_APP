@@ -13,7 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { AuthContext } from "../../src/contexts/AuthContext";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { router, useNavigation } from "expo-router";
 
 const Profile = () => {
@@ -29,7 +29,6 @@ const Profile = () => {
     address: user?.address || "",
     image: null,
   });
-
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -148,6 +147,24 @@ const Profile = () => {
       setLoading(false);
     }
   };
+
+  // Authentication error view
+    if (!user?.id) {
+      return (
+        <View className="flex-1 justify-center items-center bg-gray-50 p-4">
+          <FontAwesome5 name="user-lock" size={50} color="#ef4444" />
+          <Text className="mt-4 text-gray-800 text-lg font-medium text-center">
+            Please log in to view tasks
+          </Text>
+          <TouchableOpacity 
+            onPress={() => router.push('/screens/login')}
+            className="mt-4 bg-blue-600 px-6 py-3 rounded-lg"
+          >
+            <Text className="text-white font-medium">Go to Login</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
 
   return (
     <LinearGradient colors={["#F0F4F8", "#FFFFFF"]} style={styles.container}>

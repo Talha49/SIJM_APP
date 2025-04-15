@@ -9,7 +9,13 @@ export default function TabLayout() {
 
   const renderProfileButton = () => {
     if (!user) {
-      return <Ionicons name="person-circle-outline" size={28} color="white" />;
+      return (
+        <Image
+          source={require("../../assets/pp.jpg")}
+          className="h-12 w-12 border-2 border-blue-500 rounded-full"
+          resizeMode="cover"
+        />
+      );
     }
 
     // If user is logged in and has an image, show their image
@@ -23,7 +29,6 @@ export default function TabLayout() {
       );
     }
 
-    console.log(user);
     // If user is logged in but no image, show default image from assets
     return (
       <Image
@@ -42,7 +47,7 @@ export default function TabLayout() {
           ios: {
             position: "absolute",
           },
-          default: {  },
+          default: {},
         }),
       }}
     >

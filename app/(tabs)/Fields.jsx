@@ -129,7 +129,7 @@ const handleFetchTasks = async () => {
         </Text>
         <TouchableOpacity 
           onPress={() => router.push('/screens/login')}
-          className="mt-4 bg-cyan-600 px-6 py-3 rounded-lg"
+          className="mt-4 bg-blue-600 px-6 py-3 rounded-lg"
         >
           <Text className="text-white font-medium">Go to Login</Text>
         </TouchableOpacity>
