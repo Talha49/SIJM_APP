@@ -18,13 +18,12 @@ import {
 import { Plus } from "lucide-react-native";
 import Modal from "react-native-modal";
 import { TextInput } from "react-native";
+import { useRouter } from "expo-router";
 
 const VR = () => {
-  const { inspections, virtualTours, loading, error } = useSelector(
-    (state) => state.VTour
-  );
+  const { inspections, loading, error } = useSelector((state) => state.VTour);
   const dispatch = useDispatch();
-
+  const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newInspectionData, setNewInspectionData] = useState({
@@ -71,7 +70,7 @@ const VR = () => {
   };
 
   const renderHeader = () => (
-    <View className="flex-row justify-between items-center gap-2 bg-blue-600 px-4 pt-0 pb-6 rounded-b-3xl shadow-lg">
+    <View className="flex-row justify-between items-center gap-2 bg-blue-600 px-4 pt-0 pb-6 shadow-lg">
       <View>
         <Text className="text-white text-2xl font-bold">Site Inspections</Text>
         <Text className="text-blue-100 text-sm mt-1">
@@ -109,6 +108,11 @@ const VR = () => {
       key={inspection?.id || index}
       className="mb-6 bg-white border border-neutral-200 rounded-xl shadow overflow-hidden"
       activeOpacity={0.7}
+      onPress={() =>
+        router.push({
+          pathname: `/screens/InspectionDetails/${inspection._id}/?inspetionName=${inspection?.title}`,
+        })
+      }
     >
       <View className="p-4">
         <Text className="text-blue-600 text-xl font-bold">
@@ -133,8 +137,6 @@ const VR = () => {
   return (
     <>
       <SafeAreaView className="flex-1 bg-white">
-        <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
-
         {renderHeader()}
 
         <ScrollView

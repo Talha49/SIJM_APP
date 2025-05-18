@@ -19,6 +19,10 @@ export default function RootLayout() {
             {/* Screen Navigation */}
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="screens/InspectionDetails/[id]"
+                options={{ headerShown: false, title: "VT" }}
+              />
               <Stack.Screen name="+not-found" />
               <Stack.Screen name="login" />
             </Stack>

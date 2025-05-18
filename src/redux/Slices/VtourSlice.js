@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-const basePath = "http://192.168.1.14:3000/api"
+const basePath = "http://192.168.1.14:3000/api";
 
 export const createInspection = createAsyncThunk(
   "/api/inspection/create",
