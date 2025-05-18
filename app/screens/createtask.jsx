@@ -272,7 +272,7 @@ const CreateTaskScreen = () => {
     try {
       console.log("Request data size:", JSON.stringify(formData).length);
       const response = await axios.post(
-        "http://192.168.1.21:3000/api/New/CreateTask",
+        "http://192.168.1.14:3000/api/New/CreateTask",
         formData,
         {
           headers: { "Content-Type": "application/json" },
@@ -353,12 +353,20 @@ const CreateTaskScreen = () => {
     );
   };
 
+  function handleChange(field, value) {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  }
+
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "android" ? "padding" : "height"}
-      className="flex-1 bg-gray-100 py-6 pb-6"
+      behavior={Platform.OS === "ios" ? "padding" : null}
+      className="flex-1 bg-gray-100"
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
-      <ScrollView className="p-4">
+      <ScrollView 
+        className="p-4" 
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
         <View className="flex-row justify-between items-center mb-6">
           <Text className="text-2xl font-bold text-gray-800">Create Task</Text>
         </View>
@@ -566,7 +574,7 @@ const CreateTaskScreen = () => {
             formData.groundFloorImages.length === 0 ||
             formData.lastFloorImages.length === 0
           }
-          className={`bg-blue-500 p-4 rounded-lg flex-row items-center justify-center ${
+          className={`bg-blue-500 p-4 rounded-lg flex-row items-center justify-center mb-16 ${
             loading ||
             !formData.description ||
             !formData.priority ||
@@ -586,10 +594,6 @@ const CreateTaskScreen = () => {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-
-  function handleChange(field, value) {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  }
 };
 
 export default CreateTaskScreen;

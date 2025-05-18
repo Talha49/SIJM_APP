@@ -97,9 +97,9 @@ export default function TabLayout() {
       />
       {/* Shoot Video Tab */}
       <Tabs.Screen
-        name="Shoot"
+        name="VR"
         options={{
-          title: "Shoot",
+          title: "VR",
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="camera-retro" size={size} color={color} />
           ),

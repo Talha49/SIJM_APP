@@ -400,13 +400,7 @@ const LoginScreen = () => {
             <Text className="mx-4 text-gray-500">or</Text>
             <View className="flex-1 h-0.5 bg-gray-300" />
           </View>
-          <TouchableOpacity
-            className="bg-white rounded-xl py-4 flex-row justify-center items-center border border-gray-200"
-            onPress={() => promptAsync()}
-          >
-            <FontAwesome name="google" size={20} color="#DB4437" />
-            <Text className="text-gray-700 font-semibold ml-3">Continue with Google</Text>
-          </TouchableOpacity>
+          
         </View>
         <View className="flex justify-center items-center">
           <Link href="/" className="text-blue-500 font-semibold mt-4">Go to home</Link>
