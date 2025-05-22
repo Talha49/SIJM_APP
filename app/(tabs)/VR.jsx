@@ -170,6 +170,7 @@ const VR = () => {
             renderEmptyState()
           )}
         </ScrollView>
+        {/* Dialog */}
         {isDialogOpen && (
           <View className="flex-1 w-full h-full z-50 p-4 bg-black/50 justify-center items-center absolute top-0">
             {/* The key here is to make sure this View takes up appropriate space */}
