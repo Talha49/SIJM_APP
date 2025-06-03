@@ -81,10 +81,10 @@ const VR = () => {
         activeOpacity={0.7}
         onPress={() => setIsDialogOpen(true)}
       >
-        <View className="bg-white p-2 rounded-lg flex-row items-center gap-2">
+        {/* <View className="bg-white p-2 rounded-lg flex-row items-center gap-2">
           <Plus size={18} />
           <Text>Add New</Text>
-        </View>
+        </View> */}
       </TouchableOpacity>
     </View>
   );

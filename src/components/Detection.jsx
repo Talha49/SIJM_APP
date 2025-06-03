@@ -13,6 +13,9 @@ import {
   Pressable
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
+import * as Sharing from "expo-sharing";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { uploadImage } from "../contexts/api";
@@ -55,7 +58,7 @@ const DetectionComponent = ({ detectionType, title }) => {
 
   // Function to pick image from gallery
   const pickImage = async () => {
-    try{
+    try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         showToast("Permission to access media library is required!", "error");
@@ -71,13 +74,11 @@ const DetectionComponent = ({ detectionType, title }) => {
         setResult(null);
         setDetectedImage(null);
       }
-    }
-    catch(error){
+    } catch (error) {
       showToast(`Failed to pick image: ${error.message}`, "error");
-
     }
-   
   };
+
   // Function to capture image using camera
   const takePhoto = async () => {
     try {
@@ -139,6 +140,65 @@ const DetectionComponent = ({ detectionType, title }) => {
       showToast(error.message, "error");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Function to save the detected image to gallery
+  const saveDetectedImage = async () => {
+    if (!detectedImage) {
+      showToast("No detected image to save", "info");
+      return;
+    }
+
+    try {
+      // Request permission to access media library
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== "granted") {
+        showToast("Permission to access media library is required!", "error");
+        return;
+      }
+
+      // Download the image to a temporary file
+      const fileUri = `${FileSystem.cacheDirectory}detected_image_${Date.now()}.jpg`;
+      const { uri } = await FileSystem.downloadAsync(detectedImage, fileUri);
+
+      // Save the image to the gallery
+      await MediaLibrary.saveToLibraryAsync(uri);
+
+      showToast("Image saved to gallery successfully", "success");
+    } catch (error) {
+      showToast(`Failed to save image: ${error.message}`, "error");
+    }
+  };
+
+  // Function to share the detected image
+  const shareDetectedImage = async () => {
+    if (!detectedImage) {
+      showToast("No detected image to share", "info");
+      return;
+    }
+
+    try {
+      // Download the image to a temporary file
+      const fileUri = `${FileSystem.cacheDirectory}detected_image_${Date.now()}.jpg`;
+      const { uri } = await FileSystem.downloadAsync(detectedImage, fileUri);
+
+      // Check if sharing is available
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        showToast("Sharing is not available on this device", "error");
+        return;
+      }
+
+      // Share the image
+      await Sharing.shareAsync(uri, {
+        mimeType: "image/jpeg",
+        dialogTitle: "Share Detected Image",
+      });
+
+      showToast("Image shared successfully", "success");
+    } catch (error) {
+      showToast(`Failed to share image: ${error.message}`, "error");
     }
   };
 
@@ -324,6 +384,30 @@ const DetectionComponent = ({ detectionType, title }) => {
               resizeMode="contain"
             />
           </LinearGradient>
+          <View style={styles.actionButtonContainer}>
+            <LinearGradient
+              colors={['#3B82F6', '#2563EB']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.uploadButtonGradient}
+            >
+              <TouchableOpacity onPress={saveDetectedImage} style={styles.uploadButton}>
+                <FontAwesome5 name="download" size={18} color="#fff" style={styles.uploadIcon} />
+                <Text style={styles.uploadButtonText}>Save to Gallery</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+            <LinearGradient
+              colors={['#3B82F6', '#2563EB']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.uploadButtonGradient}
+            >
+              <TouchableOpacity onPress={shareDetectedImage} style={styles.uploadButton}>
+                <FontAwesome5 name="share-alt" size={18} color="#fff" style={styles.uploadIcon} />
+                <Text style={styles.uploadButtonText}>Share Image</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+          </View>
         </View>
       )}
 
@@ -452,6 +536,7 @@ const styles = StyleSheet.create({
     width: width * 0.85,
     height: width * 0.85,
     borderRadius: 14,
+    resizeMode: 'contain',
   },
   uploadButtonGradient: {
     borderRadius: 12,
@@ -565,6 +650,13 @@ const styles = StyleSheet.create({
     width: width * 0.85,
     height: width * 0.85,
     borderRadius: 14,
+  },
+  actionButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    gap: 12,
+    marginTop: 16,
   },
   modalBackdrop: {
     flex: 1,
