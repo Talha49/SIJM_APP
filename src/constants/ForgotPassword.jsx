@@ -79,7 +79,7 @@ const ForgotPasswordModal = ({ isVisible, onClose }) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        'http:// 192.168.201.142:3000/api/auth/forgot-password',
+        'http:// 192.168.8.49:3000/api/auth/forgot-password',
         { email }
       );
 
@@ -139,7 +139,7 @@ const ForgotPasswordModal = ({ isVisible, onClose }) => {
     setIsLoading(true);
     try {
       const response = await axios.put(
-        'http:// 192.168.201.142:3000/api/auth/reset-password',
+        'http:// 192.168.8.49:3000/api/auth/reset-password',
         { email, newPassword }
       );
 
