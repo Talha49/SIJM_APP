@@ -48,7 +48,7 @@ const Profile = () => {
   const fetchUserData = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.8.49:3000/api/users/getusersmobile?email=${formData.email}`
+        `https://smartinspectionjobmonitoringsijm.vercel.app/api/users/getusersmobile?email=${formData.email}`
       );
       if (response.status === 200) {
         const updatedUser = response.data.user;
@@ -126,7 +126,7 @@ const Profile = () => {
       };
 
       const response = await axios.post(
-        "http://192.168.8.49:3000/api/updateProfile",
+        "https://smartinspectionjobmonitoringsijm.vercel.app/api/updateProfile",
         updateData,
         { headers: { "Content-Type": "application/json" } }
       );

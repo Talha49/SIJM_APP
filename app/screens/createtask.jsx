@@ -272,7 +272,7 @@ const CreateTaskScreen = () => {
     try {
       console.log("Request data size:", JSON.stringify(formData).length);
       const response = await axios.post(
-        "http://192.168.8.49:3000/api/New/CreateTask",
+        "https://smartinspectionjobmonitoringsijm.vercel.app/api/New/CreateTask",
         formData,
         {
           headers: { "Content-Type": "application/json" },

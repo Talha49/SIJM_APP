@@ -2,9 +2,7 @@
 import axios from "axios";
 import { manipulateAsync } from 'expo-image-manipulator';
 
-const API_URL = "http://192.168.8.49:8000"; // Your server IP
-
-/**
+const API_URL = "https://Ghauri21-DetectionTool.hf.space";/**
  * Uploads and processes an image for object detection
  * 
  * @param {string} detectionType - Type of detection (pipes, rebar, brick, beams)

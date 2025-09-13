@@ -109,7 +109,7 @@ export default function Header() {
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => {
-                      router.push("/screens/profile"); // Navigate to Profile screen
+                    router.push("/screens/Profile");
                       toggleDialog();
                     }}
                     className="bg-blue-500 flex-1 py-2 rounded-lg"

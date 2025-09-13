@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // Define the API base URL
-export const API_URL = "http://192.168.8.49:3000/api/New";
+export const API_URL = "https://smartinspectionjobmonitoringsijm.vercel.app/api/New";
 
 // Fetch tasks by user ID
 export const fetchTasks = createAsyncThunk("field/fetchTasks", async (userId, { rejectWithValue }) => {
